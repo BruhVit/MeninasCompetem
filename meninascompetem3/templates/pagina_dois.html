@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filter and Search Results</title>
+</head>
+<body>
+    <form action="{{ url_for('display_results') }}" method="POST">
+        <fieldset>
+            <legend>Categoria:</legend>
+            <label><input type="checkbox" name="categoria[]" value="EnsinoMedio"> Categoria 11</label><br>
+            <label><input type="checkbox" name="categoria[]" value="categoria2"> Categoria 2</label><br>
+            <!-- Add more checkboxes as needed -->
+        </fieldset>
+        <br>
+        <fieldset>
+            <legend>Nível:</legend>
+            <label><input type="checkbox" name="nivel[]" value="Ciências Humanas e Linguagens"> Nível 11</label><br>
+            <label><input type="checkbox" name="nivel[]" value="nivel2"> Nível 2</label><br>
+            <!-- Add more checkboxes as needed -->
+        </fieldset>
+        <br>
+        <input type="submit" name="filter_action" value="Filtrar">
+    </form>
+    
+    <form action="{{ url_for('display_results') }}" method="POST">
+        <input type="text" name="search_term" placeholder="Digite um termo de pesquisa">
+        <input type="submit" name="search_action" value="Pesquisar">
+    </form>
+    
+    <h1>DataFrame Results</h1>
+    {% if not dataframe.empty %}
+        {{ dataframe.to_html() | safe }}
+    {% else %}
+        <p>Nenhum resultado encontrado.</p>
+    {% endif %}
+</body>
+</html>
