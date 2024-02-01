@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
-import pandas as pd
 
 app = Flask(__name__)
 
@@ -26,49 +25,35 @@ def pagina_inicial():
 def pagina_um():
     return render_template('pagina_um.html')
 
-#pesquisa por filtro de categoria e nivel
-def filtragem(categorias, niveis):
+@app.route('/pagina_dois.html')
+def pagina_dois():
+    pesquisa_padrao = '0'  # Defina o valor padrão desejado
+
     with sqlite3.connect(DATABASE) as con:
-        placeholders_categoria = ",".join(["?"] * len(categorias))
-        placeholders_nivel = ",".join(["?"] * len(niveis))
-        query = f"SELECT * FROM usuarios WHERE categoria IN ({placeholders_categoria}) AND nivel IN ({placeholders_nivel})"
-        params = tuple(categorias + niveis)  # Convert lists to tuples
-        df = pd.read_sql(query, con, params=params)
-    return df
+        cur = con.cursor()
+        resultado = cur.execute('SELECT nome, site, categoria FROM usuarios WHERE categoria LIKE ?', ('%' + pesquisa_padrao + '%',)).fetchall()
 
-#pesquisa por palavra chave
-def pesquisa(termo):
+    return render_template('pagina_dois.html', resultados=resultado or [])
+
+@app.route('/processar_pesquisa', methods=['POST'])
+def processar_pesquisa():
+    pesquisa_palavra = request.form.get('termo_pesquisa', '')  # Provide default value if pesquisa_palavra is None
+    categoria = request.form.getlist('categoria')
+    nivel = request.form.getlist('nivel')
+
     with sqlite3.connect(DATABASE) as con:
-        query = "SELECT * FROM usuarios WHERE nome LIKE ? OR descricao LIKE ?"
-        params = ('%' + termo + '%', '%' + termo + '%')  # Pass termo for both placeholders
-        df = pd.read_sql(query, con, params=params)
-    return df
+        cur = con.cursor()
+        if categoria and nivel:
+            query = '''SELECT nome, descricao, nivel, valor, data_final, site FROM usuarios WHERE (nome LIKE ? OR descricao LIKE ?) AND categoria IN ({}) AND nivel IN ({})'''.format(','.join(['?']*len(categoria)), ','.join(['?']*len(niveis)))
+            params = ['%' + nivel + '%', categoria] * 2  # Duplicate pesquisa_palavra
+            params += categoria + nivel
+            cur.execute(query, params)
+        else:
+            query = '''SELECT nome, descricao, nivel, valor, data_final, categoria, site FROM usuarios WHERE nome LIKE ? OR descricao LIKE ?'''
+            params = ['%' + pesquisa_palavra + '%']
+            cur.execute(query, params)
 
-
-@app.route('/pagina_dois.html', methods=['GET', 'POST'])
-def display_results():
-    if request.method == 'POST':
-        if 'filter_action' in request.form:
-            categorias = request.form.getlist('categoria[]')
-            niveis = request.form.getlist('nivel[]')
-            if not categorias:
-                categorias = ['']
-            if not niveis:
-                niveis = ['']
-            print("Categorias:", categorias)
-            print("Niveis:", niveis)
-            dataframe = filtragem(categorias, niveis)
-            print("Filtered Dataframe:")
-            print(dataframe)  # Print the dataframe for debugging
-        elif 'search_action' in request.form:
-            search_term = request.form['search_term']
-            print("Search Term:", search_term)
-            dataframe = pesquisa(search_term)
-            print("Searched Dataframe:")
-            print(dataframe)  # Print the dataframe for debugging
-    else:
-        dataframe = pd.DataFrame() 
-    return render_template('pagina_dois.html', dataframe=dataframe)
+        resultado = cur.fetchall()
 
     if resultado:
         return render_template('pagina_dois.html', resultados=resultado)
@@ -105,5 +90,3 @@ def new_func(nivel):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
-    

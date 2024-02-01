@@ -3,37 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filter and Search Results</title>
+    <title>Página Dois</title>
+    <script src="script.js"></script>
 </head>
+
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+h1 {
+    text-align: center;
+}
+
+.categorias {
+    text-align: center;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px;
+    background-color: #ff00a6;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ff00a6;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+h2 {
+    margin-top: 20px;
+    text-align: center;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+table, th, td {
+  border-color: #ff00a6;
+  text-align: center;
+  font-size:12px;
+  padding:7px;
+}
+</style>
+
+<form action="/processar_pesquisa" method="GET">
+    <input type="text" name="termo_pesquisa" id="termo_pesquisa" placeholder="Digite sua pesquisa...">
+    <button type="submit">Pesquisar</button>
+</form>
 <body>
-    <form action="{{ url_for('display_results') }}" method="POST">
-        <fieldset>
-            <legend>Categoria:</legend>
-            <label><input type="checkbox" name="categoria[]" value="EnsinoMedio"> Categoria 11</label><br>
-            <label><input type="checkbox" name="categoria[]" value="categoria2"> Categoria 2</label><br>
-            <!-- Add more checkboxes as needed -->
-        </fieldset>
-        <br>
-        <fieldset>
-            <legend>Nível:</legend>
-            <label><input type="checkbox" name="nivel[]" value="Ciências Humanas e Linguagens"> Nível 11</label><br>
-            <label><input type="checkbox" name="nivel[]" value="nivel2"> Nível 2</label><br>
-            <!-- Add more checkboxes as needed -->
-        </fieldset>
-        <br>
-        <input type="submit" name="filter_action" value="Filtrar">
+    <h1>Página Dois</h1>
+    <form action="/processar_pesquisa" method="POST">
+        <div class="categorias">
+            <fieldset>
+                <legend>SELECIONE A CATEGORIA:</legend>
+                <label><input type="checkbox" name="categoria" value="Matemática e Engenharia"> Matemática e Engenharia</label><br>
+                <label><input type="checkbox" name="categoria" value="Ciências da Terra e Ecologia"> Ciências da Terra e Ecologia</label><br>
+                <label><input type="checkbox" name="categoria" value="Ciências Humanas e Linguagens"> Ciências Humanas e Linguagens</label><br>
+                <label><input type="checkbox" name="categoria" value="Ciências da Natureza"> Ciências da Natureza</label><br>
+                <label><input type="checkbox" name="categoria" value="Criação de Projetos"> Criação de Projetos</label><br>
+            </fieldset>
+
+            <fieldset>
+                <legend>SELECIONE O NÍVEL:</legend>
+                <label><input type="checkbox" name="nivel" value="Fundamental1"> FUNDAMENTAL 1</label><br>
+                <label><input type="checkbox" name="nivel" value="Fundamental2"> FUNDAMENTAL 2</label><br>
+                <label><input type="checkbox" name="nivel" value="EnsinoMedio"> ENSINO MÉDIO</label><br>
+                <label><input type="checkbox" name="nivel" value="Aberto"> ABERTO A TODOS</label><br>
+            </fieldset>
+        </div>
+
+        <input type="text" name="pesquisa_palavra" placeholder="Digite sua pesquisa...">
+        <button type="submit">Pesquisar</button>
     </form>
     
-    <form action="{{ url_for('display_results') }}" method="POST">
-        <input type="text" name="search_term" placeholder="Digite um termo de pesquisa">
-        <input type="submit" name="search_action" value="Pesquisar">
-    </form>
-    
-    <h1>DataFrame Results</h1>
-    {% if not dataframe.empty %}
-        {{ dataframe.to_html() | safe }}
-    {% else %}
-        <p>Nenhum resultado encontrado.</p>
-    {% endif %}
-</body>
-</html>
+    <h2>Resultados da Pesquisa:</h2>
+    <table border="1">
+        <tr>
+            {% if any(resultado[4] for resultado in resultados) %}
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Nível</th>
+            <th>Custo</th>
+            <th>Data Final</th>
+            <th>Site</th>
+            <th>Editar</th> 
+            {% endif %}
+        </tr>
+        {% for resultado in resultados %}
+        <tr>
+            <td>{{ resultado[0] }}</td>
+            <td>{{ resultado[1] }}</td>
+            <td>{{ resultado[2] }}</td>
+            <td>{{ resultado[3] }}</td>
+            {% if resultado[4] %}
+                <td>{{ resultado[4] }}</td>
+            {% endif %}
+            <td><a href="{{ resultado[5] }}">{{ resultado[5] }}</a></td>
+            <td><a href="/editar/{{ resultado[0] }}">Editar</a></td> 
+        </tr>
+        {% endfor %}
+    </table>
