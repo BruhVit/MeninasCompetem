@@ -4,133 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Página Dois</title>
-    <script src="script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-
 <style>
     body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
 
-h1 {
-    text-align: center;
-}
+    h1 {
+        text-align: center;
+    }
 
-.categorias {
-    text-align: center;
-}
+    .categorias {
+        text-align: center;
+    }
 
-form {
-    margin-bottom: 20px;
-}
+    form {
+        margin-bottom: 20px;
+    }
 
-button {
-    padding: 10px;
-    background-color: #ff00a6;
-    border: none;
-    border-radius: 4px;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
+    button {
+        padding: 10px;
+        background-color: #ff00a6;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
 
-button:hover {
-    background-color: #ff00a6;
-}
+    button:hover {
+        background-color: #ff00a6;
+    }
 
-a {
-    color: #007bff;
-    text-decoration: none;
-}
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
 
-a:hover {
-    color: #0056b3;
-}
+    a:hover {
+        color: #0056b3;
+    }
 
-h2 {
-    margin-top: 20px;
-    text-align: center;
-}
+    h2 {
+        margin-top: 20px;
+        text-align: center;
+    }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-}
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
 
-li {
-    margin-bottom: 10px;
-}
+    li {
+        margin-bottom: 10px;
+    }
 
-table, th, td {
-  border-color: #ff00a6;
-  text-align: center;
-  font-size:12px;
-  padding:7px;
-}
+    table, th, td {
+        border-color: #ff00a6;
+        text-align: center;
+        font-size: 12px;
+        padding: 7px;
+    }
 </style>
-
-<form action="/processar_pesquisa" method="GET">
-    <input type="text" name="termo_pesquisa" id="termo_pesquisa" placeholder="Digite sua pesquisa...">
-    <button type="submit">Pesquisar</button>
-</form>
 <body>
-    <h1>Página Dois</h1>
-    <form action="/processar_pesquisa" method="POST">
-        <div class="categorias">
-            <fieldset>
-                <legend>SELECIONE A CATEGORIA:</legend>
-                <label><input type="checkbox" name="categoria" value="Matemática e Engenharia"> Matemática e Engenharia</label><br>
-                <label><input type="checkbox" name="categoria" value="Ciências da Terra e Ecologia"> Ciências da Terra e Ecologia</label><br>
-                <label><input type="checkbox" name="categoria" value="Ciências Humanas e Linguagens"> Ciências Humanas e Linguagens</label><br>
-                <label><input type="checkbox" name="categoria" value="Ciências da Natureza"> Ciências da Natureza</label><br>
-                <label><input type="checkbox" name="categoria" value="Criação de Projetos"> Criação de Projetos</label><br>
-            </fieldset>
-
-            <fieldset>
-                <legend>SELECIONE O NÍVEL:</legend>
-                <label><input type="checkbox" name="nivel" value="Fundamental1"> FUNDAMENTAL 1</label><br>
-                <label><input type="checkbox" name="nivel" value="Fundamental2"> FUNDAMENTAL 2</label><br>
-                <label><input type="checkbox" name="nivel" value="EnsinoMedio"> ENSINO MÉDIO</label><br>
-                <label><input type="checkbox" name="nivel" value="Aberto"> ABERTO A TODOS</label><br>
-            </fieldset>
-        </div>
-
-        <input type="text" name="pesquisa_palavra" placeholder="Digite sua pesquisa...">
-        <button type="submit">Pesquisar</button>
+    <form>
+        <fieldset>
+            <legend>SELECIONE A CATEGORIA:</legend>
+            <label><input type="checkbox" name="categoria[]" value="Matemática e Engenharia"> Matemática e Engenharia</label><br>
+            <label><input type="checkbox" name="categoria[]" value="Ciências da Terra e Ecologia"> Ciências da Terra e Ecologia</label><br>
+            <label><input type="checkbox" name="categoria[]" value="Ciências Humanas e Linguagens"> Ciências Humanas e Linguagens</label><br>
+            <label><input type="checkbox" name="categoria[]" value="Ciências da Natureza"> Ciências da Natureza</label><br>
+            <label><input type="checkbox" name="categoria[]" value="Criação de Projetos"> Criação de Projetos</label><br>
+        </fieldset>
     </form>
-    
-    <h2>Resultados da Pesquisa:</h2>
-    <table border="1">
-        <tr>
-            {% if any(resultado[4] for resultado in resultados) %}
-            <th>Nome</th>
-            <th>Descrição</th>
-            <th>Nível</th>
-            <th>Custo</th>
-            <th>Data Final</th>
-            <th>Site</th>
-            <th>Editar</th> 
-            {% endif %}
-        </tr>
-        {% for resultado in resultados %}
-        <tr>
-            <td>{{ resultado[0] }}</td>
-            <td>{{ resultado[1] }}</td>
-            <td>{{ resultado[2] }}</td>
-            <td>{{ resultado[3] }}</td>
-            {% if resultado[4] %}
-                <td>{{ resultado[4] }}</td>
-            {% endif %}
-            <td><a href="{{ resultado[5] }}">{{ resultado[5] }}</a></td>
-            <td><a href="/editar/{{ resultado[0] }}">Editar</a></td> 
-        </tr>
-        {% endfor %}
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Nível</th>
+                <th>Valor</th>
+                <th>Data Final</th>
+                <th>Site</th> <!-- New column for the website -->
+            </tr>
+        </thead>
+        <tbody></tbody>
     </table>
+
+    <script>
+        $(document).ready(function() {
+            // Function to update results using AJAX
+            function updateResults() {
+                var categorias = [];
+                $('input[name="categoria[]"]:checked').each(function() {
+                    categorias.push($(this).val());
+                });
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json',
+                    url: '/pagina_dois',
+                    data: JSON.stringify({ categoria: categorias }),
+                    success: function(data) {
+                        $('#resultsTable tbody').empty(); // Clear previous results
+                        data.forEach(function(item) {
+                            $('#resultsTable tbody').append('<tr><td>' + item.nome + '</td><td>' + item.descricao + '</td><td>' + item.nivel + '</td><td>' + item.valor + '</td><td>' + item.data_final + '</td><td>' + item.site + '</td></tr>');
+                        });
+                    }
+                });
+            }
+
+            // Event listener for changes in categoria selection
+            $('input[name="categoria[]"]').change(function() {
+                updateResults(); // Update results when categoria selection changes
+            });
+
+            // Initial update of results
+            updateResults();
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, request, redirect, url_for
 import sqlite3
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -13,6 +14,8 @@ def criar_tabela():
 
 criar_tabela()
 
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -25,41 +28,25 @@ def pagina_inicial():
 def pagina_um():
     return render_template('pagina_um.html')
 
-@app.route('/pagina_dois.html')
+
+def filtragem(categorias):
+    with sqlite3.connect(DATABASE) as con:
+        placeholders_categoria = ",".join(["?"] * len(categorias))
+        query = f"SELECT * FROM usuarios WHERE categoria IN ({placeholders_categoria})"
+        params = tuple(categorias)
+        df = pd.read_sql(query, con, params=params)
+    return df
+
+@app.route('/pagina_dois', methods=['GET', 'POST'])
 def pagina_dois():
-    pesquisa_padrao = '0'  # Defina o valor padrão desejado
-
-    with sqlite3.connect(DATABASE) as con:
-        cur = con.cursor()
-        resultado = cur.execute('SELECT nome, site, categoria FROM usuarios WHERE categoria LIKE ?', ('%' + pesquisa_padrao + '%',)).fetchall()
-
-    return render_template('pagina_dois.html', resultados=resultado or [])
-
-@app.route('/processar_pesquisa', methods=['POST'])
-def processar_pesquisa():
-    pesquisa_palavra = request.form.get('termo_pesquisa', '')  # Provide default value if pesquisa_palavra is None
-    categoria = request.form.getlist('categoria')
-    nivel = request.form.getlist('nivel')
-
-    with sqlite3.connect(DATABASE) as con:
-        cur = con.cursor()
-        if categoria and nivel:
-            query = '''SELECT nome, descricao, nivel, valor, data_final, site FROM usuarios WHERE (nome LIKE ? OR descricao LIKE ?) AND categoria IN ({}) AND nivel IN ({})'''.format(','.join(['?']*len(categoria)), ','.join(['?']*len(niveis)))
-            params = ['%' + nivel + '%', categoria] * 2  # Duplicate pesquisa_palavra
-            params += categoria + nivel
-            cur.execute(query, params)
-        else:
-            query = '''SELECT nome, descricao, nivel, valor, data_final, categoria, site FROM usuarios WHERE nome LIKE ? OR descricao LIKE ?'''
-            params = ['%' + pesquisa_palavra + '%']
-            cur.execute(query, params)
-
-        resultado = cur.fetchall()
-
-    if resultado:
-        return render_template('pagina_dois.html', resultados=resultado)
+    if request.method == 'POST':
+        # Handle POST request (filtering and returning data)
+        categorias = request.json.get('categoria', [])
+        dataframe = filtragem(categorias)
+        return jsonify(dataframe.to_dict(orient='records'))
     else:
-        return render_template('pagina_dois.html', resultados=[])
-
+        # Handle GET request (rendering the template)
+        return render_template('pagina_dois.html')
 
 
 @app.route('/seu-script-de-processamento', methods=['POST'])
