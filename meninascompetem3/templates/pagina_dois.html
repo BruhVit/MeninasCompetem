@@ -76,7 +76,7 @@
     }
 </style>
 <body>
-    <form>
+    <form id="filterForm">
         <fieldset>
             <legend>SELECIONE A CATEGORIA:</legend>
             <label><input type="checkbox" name="categoria[]" value="Matemática e Engenharia"> Matemática e Engenharia</label><br>
@@ -85,6 +85,12 @@
             <label><input type="checkbox" name="categoria[]" value="Ciências da Natureza"> Ciências da Natureza</label><br>
             <label><input type="checkbox" name="categoria[]" value="Criação de Projetos"> Criação de Projetos</label><br>
         </fieldset>
+        <button type="submit">Pesquisar por Categoria</button> <!-- Submit button for category filter -->
+    </form>
+
+    <form id="searchForm">
+        <input type="text" id="searchTerm" placeholder="Digite sua pesquisa...">
+        <button type="submit">Pesquisar</button> <!-- Submit button for search -->
     </form>
 
     <table id="resultsTable">
@@ -95,7 +101,7 @@
                 <th>Nível</th>
                 <th>Valor</th>
                 <th>Data Final</th>
-                <th>Site</th> <!-- New column for the website -->
+                <th>Site</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -103,34 +109,45 @@
 
     <script>
         $(document).ready(function() {
-            // Function to update results using AJAX
-            function updateResults() {
-                var categorias = [];
-                $('input[name="categoria[]"]:checked').each(function() {
-                    categorias.push($(this).val());
-                });
+            function updateResults(categorias, searchTerm) {
+                var data = {
+                    categoria: categorias,
+                    search_term: searchTerm
+                };
                 $.ajax({
                     type: 'POST',
                     contentType: 'application/json',
                     url: '/pagina_dois',
-                    data: JSON.stringify({ categoria: categorias }),
+                    data: JSON.stringify(data),
                     success: function(data) {
-                        $('#resultsTable tbody').empty(); // Clear previous results
+                        $('#resultsTable tbody').empty();
                         data.forEach(function(item) {
                             $('#resultsTable tbody').append('<tr><td>' + item.nome + '</td><td>' + item.descricao + '</td><td>' + item.nivel + '</td><td>' + item.valor + '</td><td>' + item.data_final + '</td><td>' + item.site + '</td></tr>');
                         });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
                     }
                 });
             }
-
-            // Event listener for changes in categoria selection
-            $('input[name="categoria[]"]').change(function() {
-                updateResults(); // Update results when categoria selection changes
+        
+            $('#filterForm').submit(function(event) {
+                event.preventDefault();
+                var categorias = $('input[name="categoria[]"]:checked').map(function() {
+                    return $(this).val();
+                }).get();
+                var searchTerm = $('#searchTerm').val();
+                updateResults(categorias, searchTerm);
             });
-
-            // Initial update of results
-            updateResults();
+        
+            $('#searchForm').submit(function(event) {
+                event.preventDefault();
+                var searchTerm = $('#searchTerm').val();
+                updateResults([], searchTerm); // Pass an empty array for categorias
+            });
         });
     </script>
+</body>
+</html>
 </body>
 </html>

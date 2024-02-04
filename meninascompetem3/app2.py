@@ -37,13 +37,39 @@ def filtragem(categorias):
         df = pd.read_sql(query, con, params=params)
     return df
 
+def filtragem(categorias):
+    with sqlite3.connect(DATABASE) as con:
+        placeholders_categoria = ",".join(["?"] * len(categorias))
+        query = f"SELECT * FROM usuarios WHERE categoria IN ({placeholders_categoria})"
+        params = tuple(categorias)
+        df = pd.read_sql(query, con, params=params)
+    return df
+
+def search(termo):
+    with sqlite3.connect(DATABASE) as con:
+        query = "SELECT * FROM usuarios WHERE nome LIKE ? OR descricao LIKE ?"
+        params = ('%' + termo + '%', '%' + termo + '%')
+        df = pd.read_sql(query, con, params=params)
+    return df
+
+
 @app.route('/pagina_dois', methods=['GET', 'POST'])
 def pagina_dois():
     if request.method == 'POST':
-        # Handle POST request (filtering and returning data)
-        categorias = request.json.get('categoria', [])
-        dataframe = filtragem(categorias)
-        return jsonify(dataframe.to_dict(orient='records'))
+        if request.is_json:
+            data = request.get_json()
+            search_term = data.get('search_term', '')
+            if search_term:
+                # Perform search based on the search term
+                dataframe = search(search_term)
+                return jsonify(dataframe.to_dict(orient='records'))
+            else:
+                # If no search term provided, return all data
+                categorias = data.get('categoria', [])
+                dataframe = filtragem(categorias)
+                return jsonify(dataframe.to_dict(orient='records'))
+        else:
+            return jsonify({'error': 'Invalid JSON format'})
     else:
         # Handle GET request (rendering the template)
         return render_template('pagina_dois.html')
